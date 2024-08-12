@@ -6,31 +6,30 @@
 #    By: naherbal <marvin@42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/03/21 20:28:19 by naherbal          #+#    #+#              #
-#    Updated: 2023/12/26 19:57:41 by naherbal         ###   ########.fr        #
+#    Updated: 2024/03/05 14:49:14 by naherbal         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
-SRC	=	src/main.c								\
-		src/error_handling.c					\
-		src/setup.c								\
-		src/philosophers.c						\
-		src/make_philo_eat.c					\
-		src/utils.c								\
+SRC	=	src/main.c			\
+		src/check_error.c	\
+		src/utils.c			\
+		src/setup_data.c	\
+		src/philosopher.c	\
 
 OBJ		=	$(SRC:.c=.o)
 
-NAME	=	philosopher
+NAME	=	philo
 
-CFLAGS	=	-Wall -Wextra -Werror
+CFLAGS	=	-Wall -Wextra -Werror -g
 
-HEADERS	=	-I includes
+HEADERS	=	-I include
 
 RM		=	rm -rf
 
-all:		$(NAME)
+all:	$(NAME)
 
-$(NAME):	$(OBJ)
-			cc $(HEADERS) $(SRC) -o $(NAME)
+$(NAME):
+		cc $(FLAGS) $(SRC) -o $(NAME)
 
 clean:
 		$(RM) $(OBJ)

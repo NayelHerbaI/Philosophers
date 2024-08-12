@@ -5,36 +5,55 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: naherbal <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/11/06 13:16:19 by naherbal          #+#    #+#             */
-/*   Updated: 2023/11/29 11:05:37 by naherbal         ###   ########.fr       */
+/*   Created: 2024/02/29 12:25:02 by naherbal          #+#    #+#             */
+/*   Updated: 2024/03/05 16:53:19 by naherbal         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../include/philosophers.h"
+#include "../include/philosopher.h"
 
-void	display_philos_info(t_data *data);
+void	free_exit(t_data *data, pthread_t *th)
+{
+	int	i;
+
+	i = 0;
+	while (i < data->n_philo)
+		pthread_join(th[i++], NULL);
+	i = 0;
+	while (i < data->n_philo)
+		pthread_mutex_destroy(&data->philos[i++].fork);
+	pthread_mutex_destroy(&data->write);
+	pthread_mutex_destroy(&data->lock);
+	free(data->philos);
+	free(data);
+	free(th);
+}
 
 int	main(int ac, char **av)
 {
-	t_data *data;
+	t_data		*data;
+	pthread_t	*th;
+	int			i;
 
-	if (error_handling(ac, av) != 0)
+	i = 0;
+	if (check_error(ac, av) != 0)
 		return (1);
-	data = malloc(sizeof(t_data));
-	setup(data, av);
-	around_the_table(data);
-//	display_philos_info(data);
-	return (0);
-}
-
-void	display_philos_info(t_data *data)
-{
-	t_philo	*head;
-
-	head = data->philos;
-	while (head != NULL)
+	data = setup_data(ac, av);
+	th = malloc(sizeof(pthread_t) * data->n_philo);
+	while (i < data->n_philo)
 	{
-		printf("philo nb %d avec %d	%d	%d			t_die == %d\n", head->nb, head->is_eating, head->is_thinking, head->is_sleeping, head->t_to_die);
-		head = head->next;
+		if (pthread_create(&th[i], NULL, &philo, &data->philos[i]))
+		{
+			free(th);
+			free(data->philos);
+			return (printf("Thread creation failed\n"));
+		}
+		pthread_mutex_lock(&data->lock);
+		data->philos[i].last_meal = data->s_time;
+		pthread_mutex_unlock(&data->lock);
+		i++;
 	}
+	death(data);
+	free_exit(data, th);
+	return (0);
 }
